@@ -89,12 +89,12 @@ async function fetchCaptchaSuggestion() {
     const response = await fetch('/api/captcha');
     const data = await response.json();
 
-    if (data && data.question && data.id) {
+    if (data && data.question && data.id && data.timestamp) {
       captchaQuestionSuggestion.textContent = 'Berapakah ' + data.question + '?';
       currentCaptchaIdSuggestion = data.id;
       captchaInputSuggestion.value = '';
       captchaGroupSuggestion.style.display = 'block';
-      captchaStartTime = Date.now();
+      captchaStartTime = data.timestamp;
     } else {
       formMessage.textContent = 'Gagal memuat captcha. Coba lagi.';
       formMessage.classList.add('error');
