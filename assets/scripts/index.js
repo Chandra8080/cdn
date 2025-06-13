@@ -108,6 +108,54 @@ async function fetchCaptchaSuggestion() {
   }
 }
 
+const suggestionsList = document.getElementById('suggestions-list');
+const suggestionsStatus = document.getElementById('suggestions-status');
+
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
+
+async function fetchAndDisplaySuggestions() {
+    if (!suggestionsList) return;
+    suggestionsList.innerHTML = '<p>Memuat saran...</p>';
+    suggestionsStatus.style.display = 'none';
+    suggestionsStatus.className = 'form-message';
+
+    try {
+        const response = await fetch('/api/suggestions');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        if (data.length === 0) {
+            suggestionsList.innerHTML = '<p>Belum ada saran & kritik.</p>';
+            return;
+        }
+
+        suggestionsList.innerHTML = '';
+
+        data.reverse().forEach(suggestion => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.classList.add('suggestion-item');
+            suggestionItem.innerHTML = `
+                <h3>Dari: ${escapeHTML(suggestion.nama)}</h3>
+                <p>${escapeHTML(suggestion.saranKritik)}</p>
+                <small>Dikirim pada: ${new Date(suggestion.timestamp).toLocaleString()}</small>
+            `;
+            suggestionsList.appendChild(suggestionItem);
+        });
+
+    } catch (error) {
+        suggestionsList.innerHTML = '';
+        suggestionsStatus.textContent = 'Gagal memuat saran & kritik. Koneksi server bermasalah atau data tidak tersedia.';
+        suggestionsStatus.classList.add('error');
+        suggestionsStatus.style.display = 'block';
+    }
+}
+
 if (suggestionForm) {
   fetchCaptchaSuggestion();
 
@@ -158,6 +206,7 @@ if (suggestionForm) {
         formMessage.classList.add('success');
         suggestionForm.reset();
         fetchCaptchaSuggestion();
+        fetchAndDisplaySuggestions();
       } else {
         const errorData = await response.json();
         formMessage.textContent =
@@ -180,3 +229,5 @@ if (suggestionForm) {
     }
   });
 }
+
+document.addEventListener('DOMContentLoaded', fetchAndDisplaySuggestions);
