@@ -77,8 +77,7 @@ const captchaQuestionSuggestion = document.getElementById('captchaQuestionSugges
 const captchaInputSuggestion = document.getElementById('captchaInputSuggestion');
 
 let currentCaptchaIdSuggestion = null;
-let captchaStartTime = null;
-const CLIENT_VERIFICATION_OFFSET = 12345;
+let captchaGenerationTime = null;
 
 async function fetchCaptchaSuggestion() {
   if (!formMessage) return;
@@ -94,7 +93,7 @@ async function fetchCaptchaSuggestion() {
       currentCaptchaIdSuggestion = data.id;
       captchaInputSuggestion.value = '';
       captchaGroupSuggestion.style.display = 'block';
-      captchaStartTime = data.timestamp;
+      captchaGenerationTime = data.timestamp;
     } else {
       formMessage.textContent = 'Gagal memuat captcha. Coba lagi.';
       formMessage.classList.add('error');
@@ -129,14 +128,14 @@ if (suggestionForm) {
       return;
     }
 
-    if (!currentCaptchaIdSuggestion || !captchaAnswer || captchaStartTime === null) {
+    if (!currentCaptchaIdSuggestion || !captchaAnswer || captchaGenerationTime === null) {
       formMessage.textContent = 'Mohon lengkapi captcha atau refresh halaman.';
       formMessage.classList.add('error');
       formMessage.style.display = 'block';
       return;
     }
 
-    const clientVerificationToken = Date.now() - captchaStartTime + CLIENT_VERIFICATION_OFFSET;
+    const clientSubmitTimestamp = Date.now();
 
     try {
       const response = await fetch('/api/send-saran', {
@@ -149,7 +148,8 @@ if (suggestionForm) {
           saranKritik: suggestion,
           captchaId: currentCaptchaIdSuggestion,
           captchaAnswer: captchaAnswer,
-          clientVerificationToken: clientVerificationToken,
+          captchaGenerationTime: captchaGenerationTime,
+          clientSubmitTimestamp: clientSubmitTimestamp,
         }),
       });
 
