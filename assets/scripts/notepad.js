@@ -84,7 +84,7 @@ document.getElementById('current-year').textContent = new Date().getFullYear();
                 viewNoteBtn.textContent = 'Loading...';
             }
             try {
-                const response = await axios.post('/api/get-note', { code: code, password: password });
+                const response = await axios.post('https://freetools-be.onrender.com/api/get-note', { code: code, password: password });
                 if (response.data && response.data.title !== undefined && response.data.content !== undefined) {
                     if(viewNoteTitleElement) viewNoteTitleElement.textContent = response.data.title || 'Tanpa Judul';
                     if(viewNoteContentPre) viewNoteContentPre.textContent = response.data.content;
@@ -143,7 +143,7 @@ document.getElementById('current-year').textContent = new Date().getFullYear();
                     return;
                 }
                 try {
-                    const response = await axios.post('/api/create-note', {
+                    const response = await axios.post('https://freetools-be.onrender.com/api/create-note', {
                         title: title,
                         content: content,
                         password: password || null
